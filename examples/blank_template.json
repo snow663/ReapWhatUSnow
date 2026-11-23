@@ -1,0 +1,22 @@
+{
+  "schema": "snowforge.blueprint/v1",
+  "title": "New Part - Replace Title",
+  "drawing_number": "SF-NEW-001",
+  "revision": "A",
+  "units": "in",
+  "parameters": {"width":6,"height":4,"hole_dia":0.5},
+  "parameter_status": {"width":"assumed","height":"assumed","hole_dia":"assumed"},
+  "views": [
+    {"name":"Front", "entities":[
+      {"id":"body","type":"rect","origin":[0,0],"width":"=width","height":"=height"},
+      {"id":"center_hole","type":"circle","center":["=width/2","=height/2"],"r":"=hole_dia/2"}
+    ],"dimensions":[
+      {"type":"linear","mode":"horizontal","p1":[0,0],"p2":["=width",0],"offset":-0.5},
+      {"type":"linear","mode":"vertical","p1":["=width",0],"p2":["=width","=height"],"offset":0.5},
+      {"type":"diameter","entity":"center_hole","angle_deg":45,"reach":0.8}
+    ]}
+  ],
+  "checks":[],
+  "notes":["Example placeholder dimensions. Replace all assumptions before manufacture."],
+  "revision_history":[{"revision":"A","note":"Blank example"}]
+}

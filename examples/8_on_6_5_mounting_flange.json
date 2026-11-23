@@ -1,0 +1,73 @@
+{
+  "schema": "snowforge.blueprint/v1",
+  "title": "8 on 6.50 - Mounting Flange / Layout Study",
+  "drawing_number": "SF-EX-001",
+  "revision": "A",
+  "units": "in",
+  "parameters": {
+    "bolt_count": 8,
+    "bolt_circle_diameter": 6.5,
+    "bolt_hole_diameter": 0.5625,
+    "center_bore_diameter": 4.56,
+    "rim_radial_width": 2.0,
+    "outer_diameter": "=center_bore_diameter + 2*rim_radial_width",
+    "thickness": 0.375,
+    "bolt_start_angle": 0
+  },
+  "parameter_status": {
+    "bolt_count": "confirmed",
+    "bolt_circle_diameter": "confirmed",
+    "bolt_hole_diameter": "confirmed",
+    "center_bore_diameter": "confirmed",
+    "rim_radial_width": "confirmed",
+    "outer_diameter": "derived",
+    "thickness": "assumed",
+    "bolt_start_angle": "assumed"
+  },
+  "views": [
+    {
+      "name": "Top / Hole Layout",
+      "entities": [
+        {"id": "outside", "type": "circle", "layer": "outline", "center": [0, 0], "r": "=outer_diameter/2"},
+        {"id": "pilot", "type": "circle", "layer": "cut", "center": [0, 0], "r": "=center_bore_diameter/2"},
+        {"id": "bolt_circle", "type": "circle", "layer": "center", "center": [0, 0], "r": "=bolt_circle_diameter/2"},
+        {"id": "bolt_holes", "type": "polar_holes", "layer": "cut", "center": [0, 0],
+         "pitch_radius": "=bolt_circle_diameter/2", "hole_radius": "=bolt_hole_diameter/2",
+         "count": "=bolt_count", "start_deg": "=bolt_start_angle"},
+        {"id": "center_cross", "type": "center_mark", "layer": "center", "center": [0, 0], "size": 0.45}
+      ],
+      "dimensions": [
+        {"id":"od", "type":"diameter", "entity":"outside", "angle_deg":45, "reach":0.8, "prefix":"OD "},
+        {"id":"bore", "type":"diameter", "entity":"pilot", "angle_deg":200, "reach":2.55, "prefix":"BORE "},
+        {"id":"pcd", "type":"hole_pattern", "entity":"bolt_holes", "text_at":[4.25,1.0]}
+      ]
+    },
+    {
+      "name": "Side / Plate Thickness",
+      "entities": [
+        {"id":"plate_section", "type":"rect", "layer":"outline",
+         "origin":["=-outer_diameter/2", "=-thickness/2"],
+         "width":"=outer_diameter", "height":"=thickness"},
+        {"id":"bore_left", "type":"line", "layer":"hidden", "p1":["=-center_bore_diameter/2", "=-thickness/2"], "p2":["=-center_bore_diameter/2", "=thickness/2"]},
+        {"id":"bore_right", "type":"line", "layer":"hidden", "p1":["=center_bore_diameter/2", "=-thickness/2"], "p2":["=center_bore_diameter/2", "=thickness/2"]}
+      ],
+      "dimensions": [
+        {"type":"linear", "mode":"horizontal", "p1":["=-outer_diameter/2", "=-thickness/2"], "p2":["=outer_diameter/2", "=-thickness/2"], "offset":-0.75},
+        {"type":"linear", "mode":"vertical", "p1":["=-outer_diameter/2", "=-thickness/2"], "p2":["=-outer_diameter/2", "=thickness/2"], "offset":-0.65}
+      ]
+    }
+  ],
+  "checks": [
+    {"name":"minimum outer bolt-hole edge land", "expression":"=(outer_diameter-bolt_circle_diameter-bolt_hole_diameter)/2", "minimum":0.25},
+    {"name":"minimum inner bolt-hole edge land", "expression":"=(bolt_circle_diameter-center_bore_diameter-bolt_hole_diameter)/2", "minimum":0.25}
+  ],
+  "notes": [
+    "REFERENCE STUDY: layout only; do not install or machine without verifying fit/tolerances.",
+    "Holes equally spaced about the stated bolt circle; pattern orientation is assumed.",
+    "Plate thickness is an example assumption and must be specified before fabrication.",
+    "Center bore fit, hub engagement, concentricity, and material are not specified."
+  ],
+  "revision_history": [
+    {"revision":"A", "note":"Initial parametric demonstration (not production-approved)"}
+  ]
+}

@@ -1,0 +1,55 @@
+name: Build SnowForge Blueprints
+on:
+  push:
+    paths:
+      - 'snowforge/**'
+      - 'examples/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - '.github/workflows/blueprints.yml'
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      drawing_spec:
+        description: 'Path to drawing spec JSON in repository'
+        required: true
+        default: examples/8_on_6_5_mounting_flange.json
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install drawing toolkit and tests
+        run: python -m pip install -e '.[test]'
+      - name: Run parametric geometry tests
+        run: python -m pytest -q
+      - name: Resolve input spec
+        id: select
+        env:
+          SELECTED: ${{ inputs.drawing_spec }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path(os.getenv('SELECTED') or 'examples/8_on_6_5_mounting_flange.json')
+          root=Path.cwd().resolve()
+          resolved=(root / p).resolve()
+          if not resolved.is_relative_to(root) or resolved.suffix.lower()!='.json' or not resolved.is_file():
+              raise SystemExit('Invalid spec file path')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as fh:
+              fh.write('spec='+str(resolved.relative_to(root))+'\n')
+          PY
+      - name: Generate PDF, SVG, DXF, PNG and traceable JSON
+        run: python -m snowforge build --input '${{ steps.select.outputs.spec }}' --out build/drawing
+      - name: Upload blueprint package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snowforge-blueprint
+          path: build/drawing/
+          if-no-files-found: warn
